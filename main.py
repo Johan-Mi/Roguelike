@@ -92,7 +92,6 @@ def redraw():
         ray_x = player_x + 0.5
         ray_y = player_y + 0.5
 
-        # FIXME These formulas are incorrect
         if math.pi * 1.5 > ray_dir > math.pi * 0.5:  # Left grid line
             ray_vert_dist = abs(ray_x % 1 / math.cos(ray_dir))
         else:  # Right grid line
@@ -103,9 +102,6 @@ def redraw():
         else:  # Bottom grid line
             ray_horiz_dist = abs(
                 (ray_y % 1 - 1) / math.cos(math.pi * 0.5 - ray_dir))
-
-        if ray_num == SCREEN_WIDTH / 2:
-            print(ray_horiz_dist, ray_vert_dist)
 
         ray_dist = min(ray_horiz_dist, ray_vert_dist)
 
