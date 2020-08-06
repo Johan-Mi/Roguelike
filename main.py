@@ -92,15 +92,20 @@ def redraw():
         ray_x = player_x + 0.5
         ray_y = player_y + 0.5
 
-        if math.pi > ray_dir > math.pi * 0.5:
-            ray_vert_dist = ray_x % 1 * math.cos(ray_dir)
-        else:
-            ray_vert_dist = (ray_x % 1 - 1) * math.cos(ray_dir)
+        # FIXME These formulas are incorrect
+        if math.pi * 1.5 > ray_dir > math.pi * 0.5:  # Left grid line
+            ray_vert_dist = abs(ray_x % 1 / math.cos(ray_dir))
+        else:  # Right grid line
+            ray_vert_dist = abs((ray_x % 1 - 1) / math.cos(ray_dir))
 
-        if 0 > ray_dir > math.pi:
-            ray_horiz_dist = (1 - ray_y % 1) * math.sin(ray_dir)
-        else:
-            ray_horiz_dist = ray_y % 1 * math.cos(ray_dir)
+        if ray_dir > math.pi:  # Top grid line
+            ray_horiz_dist = abs(ray_y % 1 / math.cos(math.pi * 0.5 - ray_dir))
+        else:  # Bottom grid line
+            ray_horiz_dist = abs(
+                (ray_y % 1 - 1) / math.cos(math.pi * 0.5 - ray_dir))
+
+        if ray_num == SCREEN_WIDTH / 2:
+            print(ray_horiz_dist, ray_vert_dist)
 
         ray_dist = min(ray_horiz_dist, ray_vert_dist)
 
@@ -136,20 +141,20 @@ def redraw():
             screen.putpixel(
                 (ray_num, ((SCREEN_HEIGHT - wall_height) // 2) + y_pos), color)
 
-    # for y_pos in range(map_height):
-    #     for x_pos in range(map_width):
-    #         color = {
-    #             "#": (0xbb, 0xc2, 0xcf),
-    #             " ": (0x02, 0x02, 0x02),
-    #         }[game_map[y_pos][x_pos]]
-    #         screen.putpixel((x_pos * 2 + 3, y_pos * 2 + 3), color)
-    #         screen.putpixel((x_pos * 2 + 3, y_pos * 2 + 4), color)
-    #         screen.putpixel((x_pos * 2 + 4, y_pos * 2 + 3), color)
-    #         screen.putpixel((x_pos * 2 + 4, y_pos * 2 + 4), color)
-    # screen.putpixel((player_x * 2 + 3, player_y * 2 + 3), (0xff, 0x00, 0x00))
-    # screen.putpixel((player_x * 2 + 3, player_y * 2 + 4), (0xff, 0x00, 0x00))
-    # screen.putpixel((player_x * 2 + 4, player_y * 2 + 3), (0xff, 0x00, 0x00))
-    # screen.putpixel((player_x * 2 + 4, player_y * 2 + 4), (0xff, 0x00, 0x00))
+    for y_pos in range(map_height):
+        for x_pos in range(map_width):
+            color = {
+                "#": (0xbb, 0xc2, 0xcf),
+                " ": (0x02, 0x02, 0x02),
+            }[game_map[y_pos][x_pos]]
+            screen.putpixel((x_pos * 2 + 3, y_pos * 2 + 3), color)
+            screen.putpixel((x_pos * 2 + 3, y_pos * 2 + 4), color)
+            screen.putpixel((x_pos * 2 + 4, y_pos * 2 + 3), color)
+            screen.putpixel((x_pos * 2 + 4, y_pos * 2 + 4), color)
+    screen.putpixel((player_x * 2 + 3, player_y * 2 + 3), (0xff, 0x00, 0x00))
+    screen.putpixel((player_x * 2 + 3, player_y * 2 + 4), (0xff, 0x00, 0x00))
+    screen.putpixel((player_x * 2 + 4, player_y * 2 + 3), (0xff, 0x00, 0x00))
+    screen.putpixel((player_x * 2 + 4, player_y * 2 + 4), (0xff, 0x00, 0x00))
 
     screen.save("game/img.png")
 
