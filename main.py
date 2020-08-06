@@ -4,12 +4,12 @@
 import math
 from PIL import Image
 from gfx.brick import *
+from gfx.cracked_brick import *
 
-SCREEN_WIDTH = 480
+SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 360
 
-FOV = 3.1
-RAY_STEP = 0.015
+FOV = 3.4
 
 TILE_TEXTURE_WIDTH = 32
 TILE_TEXTURE_HEIGHT = 48
@@ -89,26 +89,24 @@ def redraw():
         eye_x = math.cos(ray_dir)
         eye_y = math.sin(ray_dir)
 
-        ray_x = player_x + 0.5
-        ray_y = player_y + 0.5
+        ray_dist = 0
 
-        if math.pi * 1.5 > ray_dir > math.pi * 0.5:  # Left grid line
-            ray_vert_dist = abs(ray_x % 1 / math.cos(ray_dir))
-        else:  # Right grid line
-            ray_vert_dist = abs((ray_x % 1 - 1) / math.cos(ray_dir))
+        while game_map[int(ray_y := player_y + 0.5 + eye_y * ray_dist)][int(
+                ray_x := player_x + 0.5 + eye_x * ray_dist)] == " ":
+            if math.pi * 1.5 > ray_dir > math.pi * 0.5:  # Left grid line
+                ray_vert_dist = abs(ray_x % 1 / math.cos(ray_dir))
+            else:  # Right grid line
+                ray_vert_dist = abs((ray_x % 1 - 1) / math.cos(ray_dir))
 
-        if ray_dir > math.pi:  # Top grid line
-            ray_horiz_dist = abs(ray_y % 1 / math.cos(math.pi * 0.5 - ray_dir))
-        else:  # Bottom grid line
-            ray_horiz_dist = abs(
-                (ray_y % 1 - 1) / math.cos(math.pi * 0.5 - ray_dir))
+            if ray_dir > math.pi:  # Top grid line
+                ray_horiz_dist = abs(ray_y % 1 /
+                                     math.cos(math.pi * 0.5 - ray_dir))
+            else:  # Bottom grid line
+                ray_horiz_dist = abs(
+                    (ray_y % 1 - 1) / math.cos(math.pi * 0.5 - ray_dir))
 
-        ray_dist = min(ray_horiz_dist, ray_vert_dist)
-
-        while game_map[int(player_y + 0.5 +
-                           eye_y * ray_dist)][int(player_x + 0.5 +
-                                                  eye_x * ray_dist)] != "#":
-            ray_dist += RAY_STEP
+            ray_dist += min(ray_horiz_dist, ray_vert_dist) * 1.001
+            # TODO Round ray coordinates instead of multiplying ray_dist
 
         ray_dist_adjusted = ray_dist * math.cos(player_dir * math.pi * 0.5 -
                                                 ray_dir)
@@ -118,10 +116,7 @@ def redraw():
         ray_x = player_x + 0.5 + eye_x * ray_dist
         ray_y = player_y + 0.5 + eye_y * ray_dist
 
-        ray_x_prev = ray_x - eye_x * RAY_STEP
-        ray_y_prev = ray_y - eye_y * RAY_STEP
-
-        if (int(ray_x) != int(ray_x_prev)):
+        if ray_horiz_dist > ray_vert_dist:
             texture_x = int((ray_y % 1) * TILE_TEXTURE_WIDTH)
         else:
             texture_x = int((ray_x % 1) * TILE_TEXTURE_WIDTH)
@@ -131,7 +126,10 @@ def redraw():
                 min(SCREEN_HEIGHT - ((SCREEN_HEIGHT - wall_height) // 2),
                     wall_height)):
             texture_y = int(y_pos / wall_height * TILE_TEXTURE_HEIGHT)
-            color = BRICK_TEXTURE[texture_y * TILE_TEXTURE_WIDTH + texture_x]
+            color = {
+                    "#": BRICK_TEXTURE,
+                    "%": CRACKED_BRICK_TEXTURE,
+                    }[game_map[int(ray_y)][int(ray_x)]][texture_y * TILE_TEXTURE_WIDTH + texture_x]
             shading = math.exp(-math.sqrt(ray_dist / 2))
             color = tuple(int(i * shading) for i in color)
             screen.putpixel(
@@ -141,6 +139,7 @@ def redraw():
         for x_pos in range(map_width):
             color = {
                 "#": (0xbb, 0xc2, 0xcf),
+                "%": (0xbb, 0xc2, 0xcf),
                 " ": (0x02, 0x02, 0x02),
             }[game_map[y_pos][x_pos]]
             screen.putpixel((x_pos * 2 + 3, y_pos * 2 + 3), color)
