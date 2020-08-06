@@ -84,11 +84,25 @@ def redraw():
                        (0x0e, 0x0e, 0x0e))
 
     for ray_num in range(SCREEN_WIDTH):
-        ray_dist = 0
-        ray_dir = player_dir * math.pi * 0.5 + math.atan(
-            (ray_num / SCREEN_WIDTH - 0.5) * FOV)
+        ray_dir = (player_dir * math.pi * 0.5 + math.atan(
+            (ray_num / SCREEN_WIDTH - 0.5) * FOV)) % (math.pi * 2)
         eye_x = math.cos(ray_dir)
         eye_y = math.sin(ray_dir)
+
+        ray_x = player_x + 0.5
+        ray_y = player_y + 0.5
+
+        if math.pi > ray_dir > math.pi * 0.5:
+            ray_vert_dist = ray_x % 1 * math.cos(ray_dir)
+        else:
+            ray_vert_dist = (ray_x % 1 - 1) * math.cos(ray_dir)
+
+        if 0 > ray_dir > math.pi:
+            ray_horiz_dist = (1 - ray_y % 1) * math.sin(ray_dir)
+        else:
+            ray_horiz_dist = ray_y % 1 * math.cos(ray_dir)
+
+        ray_dist = min(ray_horiz_dist, ray_vert_dist)
 
         while game_map[int(player_y + 0.5 +
                            eye_y * ray_dist)][int(player_x + 0.5 +
@@ -98,7 +112,7 @@ def redraw():
         ray_dist_adjusted = ray_dist * math.cos(player_dir * math.pi * 0.5 -
                                                 ray_dir)
 
-        wall_height = int(SCREEN_HEIGHT / ray_dist_adjusted * 0.5)
+        wall_height = int(SCREEN_HEIGHT / ray_dist_adjusted * 0.45)
 
         ray_x = player_x + 0.5 + eye_x * ray_dist
         ray_y = player_y + 0.5 + eye_y * ray_dist
