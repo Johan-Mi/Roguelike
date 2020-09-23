@@ -9,7 +9,7 @@ from gfx.cracked_brick import *
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 360
 
-FOV = 3.4
+FOV = 3.6
 
 TILE_TEXTURE_WIDTH = 32
 TILE_TEXTURE_HEIGHT = 48
@@ -127,9 +127,10 @@ def redraw():
                     wall_height)):
             texture_y = int(y_pos / wall_height * TILE_TEXTURE_HEIGHT)
             color = {
-                    "#": BRICK_TEXTURE,
-                    "%": CRACKED_BRICK_TEXTURE,
-                    }[game_map[int(ray_y)][int(ray_x)]][texture_y * TILE_TEXTURE_WIDTH + texture_x]
+                "#": BRICK_TEXTURE,
+                "%": CRACKED_BRICK_TEXTURE,
+            }[game_map[int(ray_y)][int(ray_x)]][texture_y * TILE_TEXTURE_WIDTH
+                                                + texture_x]
             shading = math.exp(-math.sqrt(ray_dist / 2))
             color = tuple(int(i * shading) for i in color)
             screen.putpixel(
